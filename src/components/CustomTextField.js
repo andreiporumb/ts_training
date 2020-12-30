@@ -1,0 +1,30 @@
+import _defineProperty from"@babel/runtime/helpers/esm/defineProperty";import _extends from"@babel/runtime/helpers/esm/extends";import _objectWithoutProperties from"@babel/runtime/helpers/esm/objectWithoutProperties";function ownKeys(object,enumerableOnly){var keys=Object.keys(object);if(Object.getOwnPropertySymbols){var symbols=Object.getOwnPropertySymbols(object);if(enumerableOnly)symbols=symbols.filter(function(sym){return Object.getOwnPropertyDescriptor(object,sym).enumerable});keys.push.apply(keys,symbols)}return keys}function _objectSpread(target){for(var i=1;i<arguments.length;i++){var source=arguments[i]!=null?arguments[i]:{};if(i%2){ownKeys(Object(source),true).forEach(function(key){_defineProperty(target,key,source[key])})}else if(Object.getOwnPropertyDescriptors){Object.defineProperties(target,Object.getOwnPropertyDescriptors(source))}else{ownKeys(Object(source)).forEach(function(key){Object.defineProperty(target,key,Object.getOwnPropertyDescriptor(source,key))})}}return target}/* eslint-disable react/prop-types */import React,{useState,useEffect,useCallback}from"react";import PropTypes from"prop-types";import NumberFormat from"react-number-format";import{makeStyles,TextField}from"@material-ui/core";import textFieldStyle from"./textFieldStyle";import{useDebounce}from"use-debounce";import{curry}from"ramda";const useStyles=makeStyles(textFieldStyle);const isAllowed=values=>!(values.floatValue&&values.floatValue.toString().includes("e"));function NumberFormatCustom(props){const{inputRef,onChange,decimalScale,fixedDecimalScale,thousandSeparator,language}=props,other=_objectWithoutProperties(props,["inputRef","onChange","decimalScale","fixedDecimalScale","thousandSeparator","language"]);let formatter=new Intl.NumberFormat(language);var thousandSep=thousandSeparator?formatter.format(1111).replace(/1/g,""):thousandSeparator;var decimalSeparator=formatter.format(1.1).replace(/1/g,"");const valueIsNumericString=!!props.value&&typeof props.value==="string"&&!Number.isNaN(Number(props.value));const handleValueChange=useCallback(values=>onChange(values.floatValue),[onChange]);return/*#__PURE__*/React.createElement(NumberFormat,_extends({},other,{ref:ref=>{inputRef(ref?ref.inputElement:null)},style:{textAlign:"right"},onValueChange:handleValueChange,isAllowed:isAllowed,decimalScale:decimalScale,fixedDecimalScale:fixedDecimalScale,thousandSeparator:thousandSep,decimalSeparator:decimalSeparator,isNumericString:valueIsNumericString//format = {customFormat}
+}))}NumberFormatCustom.propTypes={inputRef:PropTypes.func.isRequired,onChange:PropTypes.func.isRequired,decimalScale:PropTypes.number.isRequired,fixedDecimalScale:PropTypes.bool,thousandSeparator:PropTypes.oneOfType([PropTypes.string,PropTypes.bool])};NumberFormatCustom.defaultProps={decimalScale:2,fixedDecimalScale:true,thousandSeparator:true};// TODO: this is for backwards compatibility (onTextBoxChange) ... remove onTextBoxChange and keep only value
+const setValueToDesiredFormat=curry((isNumeric,value)=>isNumeric?value:{target:{value}});const getValueFromDesiredFormat=curry((isNumeric,e)=>isNumeric?e:e===null||e===void 0?void 0:e.target.value);function CustomTextField(_ref){let{isNumeric,customInputProps,endAdornment,startAdornment,InputLabelProps,className,value,onChange,debounceBy}=_ref,rest=_objectWithoutProperties(_ref,["isNumeric","customInputProps","endAdornment","startAdornment","InputLabelProps","className","value","onChange","debounceBy"]);const classes=useStyles();const customInput=isNumeric?{inputComponent:NumberFormatCustom,inputProps:_objectSpread({className:classes.input},customInputProps),endAdornment,startAdornment}:{inputProps:_objectSpread({className:classes.input},customInputProps),endAdornment,startAdornment};const[localValue,setLocalValue]=useState(value);const[debouncedValue]=useDebounce(localValue,debounceBy);// eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(()=>{debouncedValue!==value&&onChange(setValueToDesiredFormat(isNumeric)(debouncedValue))},[debouncedValue]);// eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(()=>{value!==localValue&&setLocalValue(value)},[value]);const handleChange=useCallback(e=>setLocalValue(getValueFromDesiredFormat(isNumeric)(e)),[isNumeric]);return/*#__PURE__*/React.createElement(TextField,_extends({},rest,{onChange:handleChange,value:localValue,className:classes.textField+" "+className,InputProps:customInput,InputLabelProps:_objectSpread({className:classes.label},InputLabelProps)}))}CustomTextField.defaultProps={isNumeric:false,debounceBy:0,onChange:()=>{}};CustomTextField.propTypes={/**
+  * Override or extend the styles applied to the component.
+  */className:PropTypes.string,/**
+  * If true, the input will accept only numeric values.
+  */isNumeric:PropTypes.bool,/**
+  * Other properties you can provide the component with.
+  */customInputProps:PropTypes.object,/**
+  * End adornment of componenent. (Usually an InputAdornment from material-ui)
+  */endAdornment:PropTypes.any,/**
+  * Start adornment of componenent. (Usually an InputAdornment from material-ui)
+  */startAdornment:PropTypes.any,/**
+  * Props applied to the InputLabel element.
+  */InputLabelProps:PropTypes.object,/**
+  * The value of the `input` element, required for a controlled component.
+  */value:PropTypes.any,/**
+  * Callback fired when the value is changed.
+  *
+  * @param {object} event The event source of the callback.
+  * You can pull out the new value by accessing `event.target.value` (string).
+  */onChange:PropTypes.func,/**
+  * The delay of debouncing.
+  */debounceBy:PropTypes.number,/**
+  * The current language, preferably taken from the i18next (i18.language) or another internationalization library
+  */language:PropTypes.string};export default CustomTextField;
+
+//# sourceMappingURL=CustomTextField.js.map
